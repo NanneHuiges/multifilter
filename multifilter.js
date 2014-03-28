@@ -2,13 +2,18 @@
   "use strict";
   $.fn.multifilter = function(options) {
     var settings = $.extend( {
-      'target'        : $('table'),
-      'method'    : 'thead' // This can be thead or class
+      'target'    : $('table'),
+      'method'    : 'thead', // This can be thead or class
+      'hideclass' : '__multi_hide' //if this has namespacing issues, you can rename the class used.
     }, options);
 
     jQuery.expr[":"].Contains = function(a, i, m) {
       return (a.textContent || a.innerText || "").toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
     };
+    
+    //use a style for hiding instead of .hide and .show
+    //it is quicker for some reason to let css figure out the new table layout after hiding.
+    $('body').append('<style>.'+settings.hideclass+'{display:none;}</style>');
 
     this.each(function() {
       var $this = $(this);
@@ -26,7 +31,7 @@
       if (settings.method === 'class') {
         // Match the data-col attribute to the class on each column
         var col = rows.first().find('td.' + $this.data('col') + '');
-        var col_index = rows.first().find($('td')).index(col);   
+        var col_index = rows.first().find('td').index(col);   
       };
 
       $this.change(function() {
@@ -41,19 +46,19 @@
               cell.attr('data-filtered', 'negative');
             }
             if (row.find(item_tag + "[data-filtered=negative]").size() > 0) {
-               row.hide();
+                row.addClass(settings.hideclass);
             } else {
               if (row.find(item_tag + "[data-filtered=positive]").size() > 0) {
-                row.show();
+            	  row.removeClass(settings.hideclass);
               }
             }
           } else {
             cell.attr('data-filtered', 'positive');
             if (row.find(item_tag + "[data-filtered=negative]").size() > 0) {
-              row.hide();
+                row.addClass(settings.hideclass);
             } else {
               if (row.find(item_tag + "[data-filtered=positive]").size() > 0) {
-                row.show();
+            	row.removeClass(settings.hideclass);
               }
             }
           }
